@@ -1,0 +1,460 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>ParsePipeline (Buck)</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<script type="text/javascript"><!--
+    if (location.href.indexOf('is-external=true') == -1) {
+        parent.document.title="ParsePipeline (Buck)";
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar_top">
+<!--   -->
+</a><a href="#skip-navbar_top" title="Skip navigation links"></a><a name="navbar_top_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-all.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../com/facebook/buck/parser/ParseEvent.Started.html" title="class in com.facebook.buck.parser"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../com/facebook/buck/parser/ParsePipeline.Cache.html" title="interface in com.facebook.buck.parser"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?com/facebook/buck/parser/ParsePipeline.html" target="_top">Frames</a></li>
+<li><a href="ParsePipeline.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li><a href="#nested_class_summary">Nested</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">com.facebook.buck.parser</div>
+<h2 title="Class ParsePipeline" class="title">Class ParsePipeline</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">java.lang.Object</a></li>
+<li>
+<ul class="inheritance">
+<li>com.facebook.buck.parser.ParsePipeline</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/AutoCloseable.html?is-external=true" title="class or interface in java.lang">AutoCloseable</a></dd>
+</dl>
+<hr>
+<br>
+<pre><a href="http://docs.oracle.com/javase/7/docs/api/javax/annotation/concurrent.ThreadSafe.html?is-external=true" title="class or interface in javax.annotation">@ThreadSafe</a>
+public class <span class="strong">ParsePipeline</span>
+extends <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>
+implements <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/AutoCloseable.html?is-external=true" title="class or interface in java.lang">AutoCloseable</a></pre>
+<div class="block">This implements a multithreaded pipeline for parsing BUCK files.
+
+
+ The high-level flow looks like this:
+   (in) BuildTarget -> [getRawNodes] -*> [createTargetNode] -> (out) TargetNode
+ (steps in [] have their output cached, -*> means that this step has parallel fanout).
+
+ The work is simply dumped onto the executor, the <code>ProjectBuildFileParserPool</code> is used to constrain
+ the number of concurrent active parsers.
+ Within a single pipeline instance work is not duplicated (the **JobsCache variables) are used
+ to make sure we don't schedule the same work more than once), however it's possible for multiple
+ read-only commands to duplicate work.</div>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="nested_class_summary">
+<!--   -->
+</a>
+<h3>Nested Class Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Nested Class Summary table, listing nested classes, and an explanation">
+<caption><span>Nested Classes</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Class and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static interface&nbsp;</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.Cache.html" title="interface in com.facebook.buck.parser">ParsePipeline.Cache</a></strong></code>
+<div class="block">Delegate interface to make testing simpler.</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.html#ParsePipeline(com.facebook.buck.parser.ParsePipeline.Cache, com.facebook.buck.parser.ParserTargetNodeFactory, com.google.common.util.concurrent.ListeningExecutorService, com.facebook.buck.event.BuckEventBus, com.facebook.buck.parser.ProjectBuildFileParserPool, boolean)">ParsePipeline</a></strong>(<a href="../../../../com/facebook/buck/parser/ParsePipeline.Cache.html" title="interface in com.facebook.buck.parser">ParsePipeline.Cache</a>&nbsp;cache,
+             <a href="../../../../com/facebook/buck/parser/ParserTargetNodeFactory.html" title="interface in com.facebook.buck.parser">ParserTargetNodeFactory</a>&nbsp;delegate,
+             com.google.common.util.concurrent.ListeningExecutorService&nbsp;executorService,
+             <a href="../../../../com/facebook/buck/event/BuckEventBus.html" title="class in com.facebook.buck.event">BuckEventBus</a>&nbsp;buckEventBus,
+             com.facebook.buck.parser.ProjectBuildFileParserPool&nbsp;projectBuildFileParserPool,
+             boolean&nbsp;speculativeDepsTraversal)</code>
+<div class="block">Create new pipeline for parsing Buck files.</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="overviewSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span>Methods</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.html#close()">close</a></strong>()</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>com.google.common.collect.ImmutableSet&lt;<a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules">TargetNode</a>&lt;?&gt;&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.html#getAllTargetNodes(com.facebook.buck.rules.Cell, java.nio.file.Path)">getAllTargetNodes</a></strong>(<a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules">Cell</a>&nbsp;cell,
+                 <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;buildFile)</code>
+<div class="block">Obtain all <a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules"><code>TargetNode</code></a>s from a build file.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>com.google.common.util.concurrent.ListenableFuture&lt;com.google.common.collect.ImmutableSet&lt;<a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules">TargetNode</a>&lt;?&gt;&gt;&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.html#getAllTargetNodesJob(com.facebook.buck.rules.Cell, java.nio.file.Path)">getAllTargetNodesJob</a></strong>(<a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules">Cell</a>&nbsp;cell,
+                    <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;buildFile)</code>
+<div class="block">Asynchronously obtain all <a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules"><code>TargetNode</code></a>s from a build file.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>com.google.common.collect.ImmutableList&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.html#getRawNodes(com.facebook.buck.rules.Cell, java.nio.file.Path)">getRawNodes</a></strong>(<a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules">Cell</a>&nbsp;cell,
+           <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;buildFile)</code>
+<div class="block">Obtain raw, un-processed contents of a build file.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code><a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules">TargetNode</a>&lt;?&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.html#getTargetNode(com.facebook.buck.rules.Cell, com.facebook.buck.model.BuildTarget)">getTargetNode</a></strong>(<a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules">Cell</a>&nbsp;cell,
+             <a href="../../../../com/facebook/buck/model/BuildTarget.html" title="class in com.facebook.buck.model">BuildTarget</a>&nbsp;buildTarget)</code>
+<div class="block">Obtain a <a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules"><code>TargetNode</code></a>.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../../../com/facebook/buck/model/UnflavoredBuildTarget.html" title="class in com.facebook.buck.model">UnflavoredBuildTarget</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.html#parseBuildTargetFromRawRule(java.nio.file.Path, java.util.Map, java.nio.file.Path)">parseBuildTargetFromRawRule</a></strong>(<a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;cellRoot,
+                           <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;map,
+                           <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;rulePathForDebug)</code>&nbsp;</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/RuntimeException.html?is-external=true" title="class or interface in java.lang">RuntimeException</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.html#propagateRuntimeException(java.lang.Throwable)">propagateRuntimeException</a></strong>(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;e)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected com.google.common.base.Optional&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&gt;</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/facebook/buck/parser/ParsePipeline.html#selectRawNode(com.facebook.buck.model.BuildTarget, com.google.common.collect.ImmutableList)">selectRawNode</a></strong>(<a href="../../../../com/facebook/buck/model/BuildTarget.html" title="class in com.facebook.buck.model">BuildTarget</a>&nbsp;target,
+             com.google.common.collect.ImmutableList&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&gt;&nbsp;rawNodes)</code>
+<div class="block">Finds the raw node that matches the given <a href="../../../../com/facebook/buck/model/BuildTarget.html" title="class in com.facebook.buck.model"><code>BuildTarget</code></a> in the map of all raw nodes
+ from a single build file.</div>
+</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods_inherited_from_class_java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></h3>
+<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#clone()" title="class or interface in java.lang">clone</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#equals(java.lang.Object)" title="class or interface in java.lang">equals</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#finalize()" title="class or interface in java.lang">finalize</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#getClass()" title="class or interface in java.lang">getClass</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#hashCode()" title="class or interface in java.lang">hashCode</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notify()" title="class or interface in java.lang">notify</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#notifyAll()" title="class or interface in java.lang">notifyAll</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#toString()" title="class or interface in java.lang">toString</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait()" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait(long)" title="class or interface in java.lang">wait</a>, <a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true#wait(long, int)" title="class or interface in java.lang">wait</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor_detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="ParsePipeline(com.facebook.buck.parser.ParsePipeline.Cache, com.facebook.buck.parser.ParserTargetNodeFactory, com.google.common.util.concurrent.ListeningExecutorService, com.facebook.buck.event.BuckEventBus, com.facebook.buck.parser.ProjectBuildFileParserPool, boolean)">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>ParsePipeline</h4>
+<pre>public&nbsp;ParsePipeline(<a href="../../../../com/facebook/buck/parser/ParsePipeline.Cache.html" title="interface in com.facebook.buck.parser">ParsePipeline.Cache</a>&nbsp;cache,
+             <a href="../../../../com/facebook/buck/parser/ParserTargetNodeFactory.html" title="interface in com.facebook.buck.parser">ParserTargetNodeFactory</a>&nbsp;delegate,
+             com.google.common.util.concurrent.ListeningExecutorService&nbsp;executorService,
+             <a href="../../../../com/facebook/buck/event/BuckEventBus.html" title="class in com.facebook.buck.event">BuckEventBus</a>&nbsp;buckEventBus,
+             com.facebook.buck.parser.ProjectBuildFileParserPool&nbsp;projectBuildFileParserPool,
+             boolean&nbsp;speculativeDepsTraversal)</pre>
+<div class="block">Create new pipeline for parsing Buck files.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cache</code> - where to persist results.</dd><dd><code>delegate</code> - where to farm out the creation of TargetNodes to</dd><dd><code>executorService</code> - executor</dd><dd><code>buckEventBus</code> - bus to use for parse start/stop events</dd><dd><code>projectBuildFileParserPool</code> - where to get parsers from</dd><dd><code>speculativeDepsTraversal</code> - whether to automatically schedule parsing of nodes' deps in the
+                                 background.</dd></dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method_detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="getAllTargetNodes(com.facebook.buck.rules.Cell, java.nio.file.Path)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAllTargetNodes</h4>
+<pre>public&nbsp;com.google.common.collect.ImmutableSet&lt;<a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules">TargetNode</a>&lt;?&gt;&gt;&nbsp;getAllTargetNodes(<a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules">Cell</a>&nbsp;cell,
+                                                                      <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;buildFile)
+                                                                        throws <a href="../../../../com/facebook/buck/json/BuildFileParseException.html" title="class in com.facebook.buck.json">BuildFileParseException</a></pre>
+<div class="block">Obtain all <a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules"><code>TargetNode</code></a>s from a build file. This may block if the file is not cached.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cell</code> - the <a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules"><code>Cell</code></a> that the build file belongs to.</dd><dd><code>buildFile</code> - absolute path to the file to process.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>all targets from the file</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code><a href="../../../../com/facebook/buck/json/BuildFileParseException.html" title="class in com.facebook.buck.json">BuildFileParseException</a></code> - for syntax errors.</dd></dl>
+</li>
+</ul>
+<a name="getTargetNode(com.facebook.buck.rules.Cell, com.facebook.buck.model.BuildTarget)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getTargetNode</h4>
+<pre>public final&nbsp;<a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules">TargetNode</a>&lt;?&gt;&nbsp;getTargetNode(<a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules">Cell</a>&nbsp;cell,
+                          <a href="../../../../com/facebook/buck/model/BuildTarget.html" title="class in com.facebook.buck.model">BuildTarget</a>&nbsp;buildTarget)
+                                  throws <a href="../../../../com/facebook/buck/json/BuildFileParseException.html" title="class in com.facebook.buck.json">BuildFileParseException</a>,
+                                         <a href="../../../../com/facebook/buck/model/BuildTargetException.html" title="class in com.facebook.buck.model">BuildTargetException</a></pre>
+<div class="block">Obtain a <a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules"><code>TargetNode</code></a>. This may block if the node is not cached.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cell</code> - the <a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules"><code>Cell</code></a> that the <a href="../../../../com/facebook/buck/model/BuildTarget.html" title="class in com.facebook.buck.model"><code>BuildTarget</code></a> belongs to.</dd><dd><code>buildTarget</code> - name of the node we're looking for. The build file path is derived from it.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>the node</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code><a href="../../../../com/facebook/buck/json/BuildFileParseException.html" title="class in com.facebook.buck.json">BuildFileParseException</a></code> - for syntax errors in the build file.</dd>
+<dd><code><a href="../../../../com/facebook/buck/model/BuildTargetException.html" title="class in com.facebook.buck.model">BuildTargetException</a></code> - if the buildTarget is malformed</dd></dl>
+</li>
+</ul>
+<a name="getRawNodes(com.facebook.buck.rules.Cell, java.nio.file.Path)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getRawNodes</h4>
+<pre>public&nbsp;com.google.common.collect.ImmutableList&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&gt;&nbsp;getRawNodes(<a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules">Cell</a>&nbsp;cell,
+                                                                      <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;buildFile)
+                                                                        throws <a href="../../../../com/facebook/buck/json/BuildFileParseException.html" title="class in com.facebook.buck.json">BuildFileParseException</a></pre>
+<div class="block">Obtain raw, un-processed contents of a build file. May block if the result is not cached.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cell</code> - the <a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules"><code>Cell</code></a> that the build file belongs to.</dd><dd><code>buildFile</code> - absolute path to the file to process.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>all targets from the file</dd>
+<dt><span class="strong">Throws:</span></dt>
+<dd><code><a href="../../../../com/facebook/buck/json/BuildFileParseException.html" title="class in com.facebook.buck.json">BuildFileParseException</a></code> - for syntax errors.</dd></dl>
+</li>
+</ul>
+<a name="getAllTargetNodesJob(com.facebook.buck.rules.Cell, java.nio.file.Path)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAllTargetNodesJob</h4>
+<pre>public&nbsp;com.google.common.util.concurrent.ListenableFuture&lt;com.google.common.collect.ImmutableSet&lt;<a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules">TargetNode</a>&lt;?&gt;&gt;&gt;&nbsp;getAllTargetNodesJob(<a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules">Cell</a>&nbsp;cell,
+                                                                                                                             <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;buildFile)</pre>
+<div class="block">Asynchronously obtain all <a href="../../../../com/facebook/buck/rules/TargetNode.html" title="class in com.facebook.buck.rules"><code>TargetNode</code></a>s from a build file. This will leverage previously
+ cached raw contents of the file (if present) but will always loop over the contents, so
+ repeated calls (with the same args) are not free.
+
+ returned future may throw <a href="../../../../com/facebook/buck/json/BuildFileParseException.html" title="class in com.facebook.buck.json"><code>BuildFileParseException</code></a> and <a href="../../../../com/facebook/buck/util/HumanReadableException.html" title="class in com.facebook.buck.util"><code>HumanReadableException</code></a>.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cell</code> - the <a href="../../../../com/facebook/buck/rules/Cell.html" title="class in com.facebook.buck.rules"><code>Cell</code></a> that the build file belongs to.</dd><dd><code>buildFile</code> - absolute path to the file to process.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>future.</dd></dl>
+</li>
+</ul>
+<a name="parseBuildTargetFromRawRule(java.nio.file.Path, java.util.Map, java.nio.file.Path)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>parseBuildTargetFromRawRule</h4>
+<pre>public static&nbsp;<a href="../../../../com/facebook/buck/model/UnflavoredBuildTarget.html" title="class in com.facebook.buck.model">UnflavoredBuildTarget</a>&nbsp;parseBuildTargetFromRawRule(<a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;cellRoot,
+                                                <a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&nbsp;map,
+                                                <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/Path.html?is-external=true" title="class or interface in java.nio.file">Path</a>&nbsp;rulePathForDebug)</pre>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>cellRoot</code> - root path to the cell the rule is defined in.</dd><dd><code>map</code> - the map of values that define the rule.</dd><dd><code>rulePathForDebug</code> - path to the build file the rule is defined in, only used for debugging.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>the build target defined by the rule.</dd></dl>
+</li>
+</ul>
+<a name="propagateRuntimeException(java.lang.Throwable)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>propagateRuntimeException</h4>
+<pre>public static final&nbsp;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/RuntimeException.html?is-external=true" title="class or interface in java.lang">RuntimeException</a>&nbsp;propagateRuntimeException(<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Throwable.html?is-external=true" title="class or interface in java.lang">Throwable</a>&nbsp;e)</pre>
+</li>
+</ul>
+<a name="selectRawNode(com.facebook.buck.model.BuildTarget, com.google.common.collect.ImmutableList)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>selectRawNode</h4>
+<pre>protected final&nbsp;com.google.common.base.Optional&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&gt;&nbsp;selectRawNode(<a href="../../../../com/facebook/buck/model/BuildTarget.html" title="class in com.facebook.buck.model">BuildTarget</a>&nbsp;target,
+                                                                com.google.common.collect.ImmutableList&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/util/Map.html?is-external=true" title="class or interface in java.util">Map</a>&lt;<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>,<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&gt;&gt;&nbsp;rawNodes)</pre>
+<div class="block">Finds the raw node that matches the given <a href="../../../../com/facebook/buck/model/BuildTarget.html" title="class in com.facebook.buck.model"><code>BuildTarget</code></a> in the map of all raw nodes
+ from a single build file. It is assumed that the raw nodes come from a build file derived
+ from the target.</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>target</code> - target we're looking for.</dd><dd><code>rawNodes</code> - all nodes from the build file derived from the target.</dd>
+<dt><span class="strong">Returns:</span></dt><dd>a match if found, Optional.absent otherwise.</dd></dl>
+</li>
+</ul>
+<a name="close()">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>close</h4>
+<pre>public&nbsp;void&nbsp;close()</pre>
+<dl>
+<dt><strong>Specified by:</strong></dt>
+<dd><code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/AutoCloseable.html?is-external=true#close()" title="class or interface in java.lang">close</a></code>&nbsp;in interface&nbsp;<code><a href="http://docs.oracle.com/javase/7/docs/api/java/lang/AutoCloseable.html?is-external=true" title="class or interface in java.lang">AutoCloseable</a></code></dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar_bottom">
+<!--   -->
+</a><a href="#skip-navbar_bottom" title="Skip navigation links"></a><a name="navbar_bottom_firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../index-all.html">Index</a></li>
+<li><a href="../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../com/facebook/buck/parser/ParseEvent.Started.html" title="class in com.facebook.buck.parser"><span class="strong">Prev Class</span></a></li>
+<li><a href="../../../../com/facebook/buck/parser/ParsePipeline.Cache.html" title="interface in com.facebook.buck.parser"><span class="strong">Next Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../index.html?com/facebook/buck/parser/ParsePipeline.html" target="_top">Frames</a></li>
+<li><a href="ParsePipeline.html" target="_top">No Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../../allclasses-noframe.html">All Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li><a href="#nested_class_summary">Nested</a>&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor_detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method_detail">Method</a></li>
+</ul>
+</div>
+<a name="skip-navbar_bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>
